@@ -1,0 +1,111 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools-scm>=8.0", "setuptools>=65", "wheel>=0.38"]
+
+[project]
+authors = [
+  {email = "milesbai6022@gmail.com", name = "MilesBai"}
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+  "pyglet==1.5.31",
+  "trimesh==4.5.3",
+]
+description = ""
+dynamic = ["version"]
+keywords = [
+]
+name = "NAME"
+readme = "README.md"
+requires-python = ">=3.11"
+maintainers = [
+  {name = "MilesBai", email = "milesbai6022@gmail.com"}
+]
+
+[project.optional-dependencies]
+test = [
+  "flake8",
+  "pytest",
+  "pytest-cov",
+  "flake8-pyproject",
+  "black",
+  "isort",
+  "pytest-custom_exit_code",
+  "gitlint>=0.12.0"
+]
+release = [
+  "build",
+  "twine"
+]
+pre-commit = [
+  "pre-commit",
+  "black",
+  "flake8",
+  "isort",
+  "gitlint"
+]
+
+[project.urls]
+homepage = "https://github.com/Serbipunk/glsl_testfield"
+
+[tool.black]
+line-length = 120
+target-version = ['py311', 'py312']
+include = '\.pyi?$' # default
+exclude = '''       # default excludes
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.nox
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | env
+    | lib
+  )/
+  | deepmat/_version\.py  # Adding your custom exclusion here
+)
+'''
+
+[tool.flake8]
+extend-ignore = "E203"
+exclude = [
+  "docs/*",
+  "*.egg",
+  ".egg/*",
+  "__pycache__",
+  "venv/*"
+]
+max-line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pytest.ini_options]
+addopts = "--verbose --strict --junitxml=pytest-report.xml"
+norecursedirs = ".git docs venv .eggs"
+testpaths = "tests"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["*"]
+exclude = []
+
+[tool.setuptools_scm]
+write_to = "trimesh_testfield/_version.py"
+fallback_version = "0.1.0"
+
+[tool.wheel]
+universal = true
