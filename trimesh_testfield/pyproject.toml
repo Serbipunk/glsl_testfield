@@ -15,6 +15,7 @@ classifiers = [
 dependencies = [
   "pyglet==1.5.31",
   "trimesh==4.5.3",
+  "opencv-python",
   "pandas",
 ]
 description = ""
