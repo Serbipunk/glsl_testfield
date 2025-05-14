@@ -28,5 +28,8 @@ class ZeroMesh:
             cv2.circle(im, (x, y), 1, 0, -1)
         cv2.imwrite("out.png", im)
 
+    def convert_to_trimesh_cam(self):
+        pass
+
 mesh = ZeroMesh()
 mesh.project()
