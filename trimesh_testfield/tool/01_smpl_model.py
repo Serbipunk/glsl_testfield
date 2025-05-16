@@ -2,6 +2,10 @@ import cv2
 import trimesh
 import numpy as np
 
+class GeometryUtils:
+    @staticmethod
+    def
+
 class ZeroMesh:
     def __init__(self):
         self.model = trimesh.load("../data/smpl000.obj", process=False)
@@ -29,7 +33,14 @@ class ZeroMesh:
         cv2.imwrite("out.png", im)
 
     def convert_to_trimesh_cam(self):
-        pass
+        cam_R, _ = cv2.Rodrigues(self.cam_rvec)
+        x0y0z1 = cam_R.dot(np.array([0, 0, 1]))  # frame plain normal vector from (0, 0)
+        W, H = self.im_size
+        fx, fy, cx, cy = self.cam_intrinsics[[(0, 0), (1, 1), (0, 2), (1, 2)]].tolist()
+        # 0.5 * W / fx = np.cos(0.5 * fov_x)
+        fov_x = 2 * np.arctan(0.5 * W / fx)
+
 
 mesh = ZeroMesh()
 mesh.project()
+trimesh_cam = mesh.convert_to_trimesh_cam()
