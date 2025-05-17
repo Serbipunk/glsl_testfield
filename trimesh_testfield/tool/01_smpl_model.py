@@ -97,6 +97,7 @@ class ZeroMesh:
     def __init__(self):
         self.model = trimesh.load("../data/smpl000.obj", process=False)
         self.vertices = np.array(self.model.vertices)
+        self.faces = np.array(self.model.faces)
         self.vertices = self.vertices[:, [0, 2, 1]] + [0, 0.225, 0.918]
         self.cam_intrinsics = np.array([[806.4, 0, 337.9],
                                         [0, 806.4, 503.9],
@@ -121,6 +122,10 @@ class ZeroMesh:
 
     def convert_to_trimesh_cam(self):
         cam_R, _ = cv2.Rodrigues(self.cam_rvec)
+        euler_angles = GeometryUtils.rvec_to_euler(self.cam_rvec, degrees=True)
+
+        x1y0z0 = cam_R.dot(np.array([1, 0, 0]))
+        x0y1z0 = cam_R.dot(np.array([0, 1, 0]))
         x0y0z1 = cam_R.dot(np.array([0, 0, 1]))  # frame plain normal vector from (0, 0)
         W, H = self.im_size
 
@@ -130,11 +135,40 @@ class ZeroMesh:
         cam_cv_intersection = GeometryUtils.intersection_ray_plain(
             p_cv_cam_x0y0z0,
             p_cv_cam_x0y0z1,
-            (0, 0, 0)
-            (0, 1, 0)
+            (0, 0, 0),
+            (0, 1, 0),
+        )
+        distance = np.linalg.norm(cam_cv_intersection - p_cv_cam_x0y0z0)
+
+        fx, fy, cx, cy = self.cam_intrinsics.flatten()[[0, 4, 2, 5]].tolist()
+        fov_x = 2 * math.atan(W / (2 * fx)) * 180 / math.pi
+        fov_y = 2 * math.atan(H / (2 * fy)) * 180 / math.pi
+
+        w_depth_plane = distance * fx / W
+        h_depth_plane = distance * fy / H
+
+        optical_x_offset = cx / W * w_depth_plane
+        optical_y_offset = cy / H * h_depth_plane
+
+        p_cv_optical_center = p_cv_cam_x0y0z1 - x1y0z0 * optical_x_offset - x0y1z0 * optical_y_offset
+        p_cv_optical_center_intersection = GeometryUtils.intersection_ray_plain(
+            p_cv_optical_center,
+            p_cv_optical_center + x0y0z1,
+            (0, 0, 0),
+            (0, 1, 0),
         )
 
-        fx, fy, cx, cy = self.cam_intrinsics[[(0, 0), (1, 1), (0, 2), (1, 2)]].tolist()
+        # generate cam center
+        mesh = trimesh.Trimesh(vertices=self.vertices, faces=self.faces, process=False)
+        scene = trimesh.Scene(mesh)
+        cam_trimesh = scene.set_camera(
+            angles=euler_angles,
+            distance=distance,
+            center=p_cv_optical_center_intersection,
+            resolution=(W, H),
+            fov=(fov_x, fov_y),
+        )
+        scene.show()
 
 
 mesh = ZeroMesh()
